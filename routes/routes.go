@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/henrilan93/go-crud-todo/db"
-	"github.com/henrilan93/go-crud-todo/handlers"
+	"github.com/henlan93/go-crud-todo/db"
+	"github.com/henlan93/go-crud-todo/handlers"
 )
 
 func SetupRouter() *gin.Engine {

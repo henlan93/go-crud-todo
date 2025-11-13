@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/henrilan93/go-crud-todo/routes"
+	"github.com/henlan93/go-crud-todo/routes"
 	"github.com/joho/godotenv"
 )
 

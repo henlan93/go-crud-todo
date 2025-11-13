@@ -1,4 +1,4 @@
-module github.com/henrilan93/go-crud-todo
+module github.com/henlan93/go-crud-todo
 
 go 1.25.4
 

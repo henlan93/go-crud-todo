@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/<brukernavn>/go-crud-todo/db"
-	"github.com/<brukernavn>/go-crud-todo/models"
 	"github.com/gin-gonic/gin"
+	"github.com/henlan93/go-crud-todo/db"
+	"github.com/henlan93/go-crud-todo/models"
 )
 
 func CreateTodo(c *gin.Context) {
