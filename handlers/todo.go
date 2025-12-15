@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/henlan93/go-crud-todo/db"
@@ -17,8 +18,14 @@ func CreateTodo(c *gin.Context) {
 		return
 	}
 
-	_, err := db.Conn.Exec(context.Background(),
-		"INSERT INTO todos (title, completed) VALUES ($1, $2)", todo.Title, todo.Completed)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := db.Conn.QueryRow(
+		ctx,
+		"INSERT INTO todos (title, completed) VALUES ($1, $2) RETURNING id",
+		todo.Title, todo.Completed,
+	).Scan(&todo.ID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -30,10 +37,16 @@ func CreateTodo(c *gin.Context) {
 
 func GetTodo(c *gin.Context) {
 	id := c.Param("id")
-	var todo models.Todo
 
-	err := db.Conn.QueryRow(context.Background(),
-		"SELECT id, title, completed FROM todos WHERE id=$1", id).Scan(&todo.ID, &todo.Title, &todo.Completed)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var todo models.Todo
+	err := db.Conn.QueryRow(
+		ctx,
+		"SELECT id, title, completed FROM todos WHERE id=$1",
+		id,
+	).Scan(&todo.ID, &todo.Title, &todo.Completed)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
@@ -45,21 +58,36 @@ func GetTodo(c *gin.Context) {
 
 func UpdateTodo(c *gin.Context) {
 	id := c.Param("id")
-	var todo models.Todo
 
+	uid, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	var todo models.Todo
 	if err := c.ShouldBindJSON(&todo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	uid, _ := strconv.Atoi(id)
 	todo.ID = uid
 
-	_, err := db.Conn.Exec(context.Background(),
-		"UPDATE todos SET title=$1, completed=$2 WHERE id=$3", todo.Title, todo.Completed, todo.ID)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := db.Conn.Exec(
+		ctx,
+		"UPDATE todos SET title=$1, completed=$2 WHERE id=$3",
+		todo.Title, todo.Completed, todo.ID,
+	)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected() == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
 		return
 	}
 
@@ -69,11 +97,22 @@ func UpdateTodo(c *gin.Context) {
 func DeleteTodo(c *gin.Context) {
 	id := c.Param("id")
 
-	_, err := db.Conn.Exec(context.Background(),
-		"DELETE FROM todos WHERE id=$1", id)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := db.Conn.Exec(
+		ctx,
+		"DELETE FROM todos WHERE id=$1",
+		id,
+	)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected() == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
 		return
 	}
 
