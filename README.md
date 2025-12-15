@@ -12,6 +12,7 @@ go run main.go
 .env:
 DATABASE_URL=your_url
 PORT=8080
+API_TOKEN=your_token
 
 Endpoints:
 POST   /todos
