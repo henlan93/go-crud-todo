@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	// Load environment variables
+	// Load environment variables from .env
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using system environment variables")
 	}
@@ -22,7 +22,7 @@ func main() {
 		log.Fatal("Could not connect to database:", err)
 	}
 	defer db.Close()
-	log.Println("✅ Connected to database")
+	log.Println("Connected to database")
 
 	// Setup router
 	r := routes.SetupRouter()
@@ -36,7 +36,7 @@ func main() {
 	// Graceful shutdown setup
 	serverErr := make(chan error)
 	go func() {
-		log.Printf("🚀 Server running on port %s", port)
+		log.Printf("Server running on port %s", port)
 		serverErr <- r.Run(":" + port)
 	}()
 
@@ -52,8 +52,5 @@ func main() {
 		log.Println("Shutting down gracefully...")
 	}
 
-	// Close DB connection if you add a Close() function in db package
-	// db.Close()
-
-	log.Println("✅ Server stopped")
+	log.Println("Server stopped")
 }
