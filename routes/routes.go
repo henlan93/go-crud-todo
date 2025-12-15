@@ -14,7 +14,7 @@ func SetupRouter() *gin.Engine {
 
 	todos := r.Group("/todos", middleware.AuthMiddleware())
 	{
-		todos.POST("", handlers.CreateTodo)
+		todos.POST("/", handlers.CreateTodo)
 		todos.GET("/:id", handlers.GetTodo)
 		todos.PUT("/:id", handlers.UpdateTodo)
 		todos.DELETE("/:id", handlers.DeleteTodo)
